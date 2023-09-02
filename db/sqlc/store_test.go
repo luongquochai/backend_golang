@@ -24,9 +24,7 @@ func TestTransferTx(t *testing.T) {
 
 	// run n concurrent transfer transaction
 	for i := 0; i < n; i++ {
-		// txName := fmt.Sprintf("tx %d", i+1)
 		go func() {
-			// ctx := context.WithValue(context.Background())
 			result, err := store.TransferTx(context.Background(), TransferTxParams{
 				FromAccountID: account1.ID,
 				ToAccountID:   account2.ID,
