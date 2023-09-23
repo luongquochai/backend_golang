@@ -7,12 +7,18 @@ import (
 	"log"
 )
 
-type Store struct {
+type Store interface {
+	Querier
+	TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error)
+}
+
+// SQLStore provides all functions to execute SQL queries and transactions
+type SQLStore struct {
 	*Queries
 	db *sql.DB
 }
 
-func NewStore(db *sql.DB) *Store {
+func NewStore(db *sql.DB) Store {
 	var dbDriver = "postgres"
 	var dbSource = "postgresql://root:secret@127.0.0.1:5432/simple_bank?sslmode=disable"
 
@@ -22,13 +28,13 @@ func NewStore(db *sql.DB) *Store {
 		log.Fatal("cannot connect to db:", err)
 	}
 
-	return &Store{
+	return &SQLStore{
 		db:      db,
 		Queries: New(db),
 	}
 }
 
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 	defer func() {
 		err := recover()
 		if err != nil {
@@ -67,7 +73,7 @@ type TransferTxResult struct {
 	ToEntry     Entry    `json:"to_entry"`
 }
 
-func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
+func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 	var result TransferTxResult
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
