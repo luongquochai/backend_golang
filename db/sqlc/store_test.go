@@ -10,7 +10,7 @@ import (
 )
 
 func TestTransferTx(t *testing.T) {
-	var store *Store = NewStore(testDB)
+	var store Store = NewStore(testDB)
 
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
@@ -121,7 +121,7 @@ func TestTransferTxDeadlock(t *testing.T) {
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
 	fmt.Println(">> before:", account1.Balance, account2.Balance)
-	var store *Store = NewStore(testDB)
+	var store Store = NewStore(testDB)
 	n := 10
 	amount := int64(10)
 	errs := make(chan error)
