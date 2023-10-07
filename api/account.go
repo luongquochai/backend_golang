@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/lib/pq"
 	db "github.com/luongquochai/backend_golang/db/sqlc"
 )
 
@@ -28,7 +29,16 @@ func (server *Server) createAccount(ctx *gin.Context) {
 	}
 
 	account, err := server.store.CreateAccount(ctx, arg)
+
 	if err != nil {
+		//handle error if account not existed or duplicated
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "foreign_key_violation", "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return
+			}
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}

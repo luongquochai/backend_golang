@@ -1,6 +1,9 @@
 postgres:
 	docker run --name postgres15 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:15-alpine
 
+start_docker:
+	docker start postgres15
+
 createdb:
 	docker exec -it postgres15 createdb --username=root --owner=root simple_bank
 
@@ -10,8 +13,16 @@ dropdb:
 migrateup:
 	migrate -path db/migration -database "postgresql://root:secret@127.0.0.1:5432/simple_bank?sslmode=disable" -verbose up
 
+# apply 1 next migration version from the current one
+migrateup1:
+	migrate -path db/migration -database "postgresql://root:secret@127.0.0.1:5432/simple_bank?sslmode=disable" -verbose up 1
+
 migratedown:
 	migrate -path db/migration -database "postgresql://root:secret@127.0.0.1:5432/simple_bank?sslmode=disable" -verbose down
+
+# run 1 last migration down version (rollback 1 last migration) from the current one
+migratedown1:
+	migrate -path db/migration -database "postgresql://root:secret@127.0.0.1:5432/simple_bank?sslmode=disable" -verbose down 1
 
 sqlc:
 	sqlc generate
@@ -25,4 +36,4 @@ server:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/luongquochai/backend_golang/db/sqlc Store
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server mock
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server mock start_docker migrateup1 migratedown1
