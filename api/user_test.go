@@ -107,6 +107,8 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
+			// Ref pq Error code: https://github.com/lib/pq/blob/master/error.go
+			// "23505": "unique_violation"
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					CreateUser(gomock.Any(), gomock.Any()).
