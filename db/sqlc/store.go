@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+
+	"github.com/luongquochai/backend_golang/util"
 )
 
 type Store interface {
@@ -19,11 +21,15 @@ type SQLStore struct {
 }
 
 func NewStore(db *sql.DB) Store {
-	var dbDriver = "postgres"
-	var dbSource = "postgresql://root:secret@127.0.0.1:5432/simple_bank?sslmode=disable"
+	config, err := util.LoadConfig("../../")
+	if err != nil {
+		log.Fatal("Cannot load config: ", err)
+	}
+	var dbDriver = config.DBDriver
+	var dbSource = config.DBSource
 
 	// Initialize the database connection
-	db, err := sql.Open(dbDriver, dbSource)
+	db, err = sql.Open(dbDriver, dbSource)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
